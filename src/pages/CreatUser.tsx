@@ -1,8 +1,10 @@
 import React from "react";
 import { useForm } from "react-hook-form";
+import { useNavigate } from "react-router-dom";
 
-import Input from "../components/ui/Input.tsx";
-import Button from "../components/ui/Button.tsx";
+import Input from "../components/ui/Input";
+import Button from "../components/ui/Button";
+import { useUser } from "../context/useUser";
 
 type FormData = {
   fullname: string;
@@ -15,21 +17,25 @@ const CreateUser = () => {
   const {
     register,
     handleSubmit,
-    formState: { errors },
-  } = useForm<FormData>();
+    formState: { errors, isValid },
+  } = useForm<FormData>({
+    mode: "onChange",
+  });
+
+  const { setUser } = useUser();
+  const navigate = useNavigate();
 
   const onSubmit = (data: FormData) => {
-    console.log("Form verisi:", data);
+    setUser(data);
+    navigate("/user");
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="w-full max-w-md mx-3">
-      <Input<FormData>
-        label="Full Name"
-        name="fullname"
-        register={register}
-        error={errors.fullname}
-      />
+    <form
+      onSubmit={handleSubmit(onSubmit)}
+      className="w-full max-w-md mx-auto p-4"
+    >
+      <Input<FormData> label="Full Name" name="fullname" register={register} />
 
       <Input<FormData>
         label="Email"
@@ -74,7 +80,9 @@ const CreateUser = () => {
         </label>
       </div>
 
-      <Button type="submit">Create User</Button>
+      <Button type="submit" disabled={!isValid}>
+        Create User
+      </Button>
     </form>
   );
 };
