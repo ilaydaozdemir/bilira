@@ -14,8 +14,14 @@ type InputProps<T extends FieldValues> = {
   placeholder?: string;
   error?: FieldError;
   required?: boolean;
-  register: UseFormRegister<T>;
+  register?: UseFormRegister<T>; // Uncontrolled kullanım için
   validation?: RegisterOptions<T, Path<T>>;
+
+  // Controlled kullanım için
+  value?: string;
+  onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
+
+  className?: string;
 };
 
 function Input<T extends FieldValues>({
@@ -27,7 +33,20 @@ function Input<T extends FieldValues>({
   required,
   register,
   validation,
+  value,
+  onChange,
+  className = "",
 }: InputProps<T>) {
+  const inputProps = {
+    id: String(name),
+    name,
+    type,
+    placeholder,
+    className: `w-full px-4 py-2 border rounded-md outline-none transition ${
+      error ? "border-red-500" : "border-gray-300 focus:border-blue-500"
+    } ${className}`,
+  };
+
   return (
     <div className="mb-4">
       <label
@@ -36,15 +55,13 @@ function Input<T extends FieldValues>({
       >
         {label} {required && <span className="text-red-500">*</span>}
       </label>
-      <input
-        id={String(name)}
-        type={type}
-        placeholder={placeholder}
-        {...register(name, validation)}
-        className={`w-full px-4 py-2 border rounded-md outline-none transition ${
-          error ? "border-red-500" : "border-gray-300 focus:border-blue-500"
-        }`}
-      />
+
+      {register ? (
+        <input {...register(name, validation)} {...inputProps} />
+      ) : (
+        <input value={value} onChange={onChange} {...inputProps} />
+      )}
+
       {error && <p className="text-red-500 text-sm mt-1">{error.message}</p>}
     </div>
   );
